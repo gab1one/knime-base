@@ -44,27 +44,72 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 8, 2025 (Paul Bärnreuther): created
+ *   17 Sept 2025 (Manuel Hotz, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.base.node.preproc.filter.row3;
+package org.knime.core.data.time.localdate;
 
-import org.knime.node.parameters.widget.choices.Label;
+import java.time.LocalDate;
+import java.util.function.Predicate;
+
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterValueParameters;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.ValueFilterOperator;
+import org.knime.node.parameters.Widget;
 
 /**
- * Case sensitivity options for string comparisons.
+ * TODO This is only a sample impl for testing whether the framework works
  *
  * @author Manuel Hotz, KNIME GmbH, Konstanz, Germany
  */
-public enum CaseSensitivity {
+public class LocalDateCellFilterParameters implements FilterValueParameters {
 
-        /**
-         * Case sensitive comparison.
-         */
-        @Label("Case sensitive")
-        CASE_SENSITIVE, //
-        /**
-         * Case-insensitive comparison.
-         */
-        @Label("Case insensitive")
-        CASE_INSENSITIVE;
+    public static class OperatorIsUnixEpoch
+        implements ValueFilterOperator<LocalDateValue, LocalDateCellFilterParameters> {
+
+        @Override
+        public String getId() {
+            return "IS_UNIX_EPOCH";
+        }
+
+        @Override
+        public String getLabel() {
+            return "Is Unix Epoch (1970-01-01)";
+        }
+
+        @Override
+        public boolean handlesMissingCells() {
+            return false;
+        }
+
+        @Override
+        public DataType getDataType() {
+            return LocalDateCell.TYPE;
+        }
+
+        @Override
+        public Class<LocalDateCellFilterParameters> getNodeParametersClass() {
+            return LocalDateCellFilterParameters.class;
+        }
+
+        @Override
+        public Predicate<LocalDateValue> createPredicate(final DataColumnSpec runtimeColumnSpec,
+            final LocalDateCellFilterParameters filterParameters) throws InvalidSettingsException {
+            return dv -> filterParameters.m_invert != LocalDate.EPOCH.equals(dv.getLocalDate());
+        }
+
+    }
+    //
+    //    interface BoundedFilterOperatorFamily<D extends DataValue, T extends FilterValueParameters> extends FilterOperator2<D,T> {
+    //
+    //
+    //    }
+    //
+    //    OperatorIsBefore implements BoundedFilterOperatorFamily<LocalDateValue, LocalDateCellFilterParameters> {
+    //
+    //    }
+
+    @Widget(title = "Invert", description = "Invert return value (test for custom settings)")
+    boolean m_invert;
 }

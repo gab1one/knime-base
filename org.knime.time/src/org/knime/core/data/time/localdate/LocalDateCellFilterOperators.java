@@ -44,27 +44,37 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 8, 2025 (Paul Bärnreuther): created
+ *   17 Sept 2025 (Manuel Hotz, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.base.node.preproc.filter.row3;
+package org.knime.core.data.time.localdate;
 
-import org.knime.node.parameters.widget.choices.Label;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.knime.core.data.DataType;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterOperatorFamily;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterOperatorFamily.Single;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterOperators;
+import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterValueParameters;
 
 /**
- * Case sensitivity options for string comparisons.
  *
  * @author Manuel Hotz, KNIME GmbH, Konstanz, Germany
  */
-public enum CaseSensitivity {
+@SuppressWarnings("restriction")
+public class LocalDateCellFilterOperators implements FilterOperators<LocalDateValue> {
 
-        /**
-         * Case sensitive comparison.
-         */
-        @Label("Case sensitive")
-        CASE_SENSITIVE, //
-        /**
-         * Case-insensitive comparison.
-         */
-        @Label("Case insensitive")
-        CASE_INSENSITIVE;
+    @Override
+    public DataType getDataType() {
+        return LocalDateCell.TYPE;
+    }
+
+    @Override
+    public List<FilterOperatorFamily<LocalDateValue, ? extends FilterValueParameters>> getOperatorFamilies() {
+        final List<FilterOperatorFamily<LocalDateValue, ? extends FilterValueParameters>> operators =
+            new ArrayList<>();
+        operators.add(new Single<>(new LocalDateCellFilterParameters.OperatorIsUnixEpoch()));
+        return operators;
+    }
+
 }

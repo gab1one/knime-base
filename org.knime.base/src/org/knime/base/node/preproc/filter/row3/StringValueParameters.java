@@ -48,7 +48,9 @@
  */
 package org.knime.base.node.preproc.filter.row3;
 
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.data.DataValue;
+import org.knime.core.data.StringValue;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterValueParameters;
 import org.knime.node.parameters.Widget;
 import org.knime.node.parameters.layout.Before;
@@ -76,14 +78,17 @@ public class StringValueParameters implements FilterValueParameters {
     String m_value;
 
     @Override
-    public String[] stash(final ExecutionContext exec) {
-        return new String[]{m_value};
+    public StringValue[] stash() {
+        return new StringValue[]{ new StringCell(m_value) };
     }
 
     @Override
-    public void applyStash(final String[] stashedValues, final ExecutionContext exec) {
+    public void applyStash(final DataValue[] stashedValues) {
         if (stashedValues.length > 0) {
-            m_value = stashedValues[0];
+            final var first = stashedValues[0];
+            if (first instanceof StringValue val) {
+                m_value = val.getStringValue();
+            }
         }
     }
 
