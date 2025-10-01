@@ -61,7 +61,7 @@ import java.util.stream.Stream;
 import org.knime.base.node.preproc.filter.row3.operators.defaults.DefaultComparableOperators;
 import org.knime.base.node.preproc.filter.row3.operators.defaults.DefaultEqualityOperators;
 import org.knime.base.node.preproc.filter.row3.operators.defaults.SingleStringParameters;
-import org.knime.base.node.preproc.filter.row3.operators.defaults.StringEqualsParameters;
+import org.knime.base.node.preproc.filter.row3.operators.defaults.StringWithCaseParameters;
 import org.knime.base.node.preproc.filter.row3.operators.legacy.LegacyFilterParameters;
 import org.knime.base.node.preproc.filter.row3.operators.missing.IsMissingFilterOperator;
 import org.knime.base.node.preproc.filter.row3.operators.missing.IsNotMissingFilterOperator;
@@ -79,7 +79,6 @@ import org.knime.base.node.preproc.filter.row3.operators.rownumber.RowNumberOper
 import org.knime.core.data.BoundedValue;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterOperator;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterOperatorsRegistry;
 import org.knime.core.webui.node.dialog.defaultdialog.internal.dynamic.extensions.filtervalue.FilterValueParameters;
@@ -134,20 +133,6 @@ public final class FilterOperatorsUtil {
                 return TypeMappingUtils.supportsDataType(dataType);
             }
         }, //
-        // Literal strings should have case matching in addition to a string input
-        new OperatorGroup() {
-
-            @Override
-            public List<FilterOperator<? extends FilterValueParameters>> getOperators(final DataType dataType) {
-                return List.of(); // TODO create Equals, NotEquals, NotEqualsNorMissing with case sensitivity parameters
-            }
-
-            @Override
-            public boolean isApplicable(final DataType dataType) {
-                return StringCell.TYPE.equals(dataType);
-            }
-
-        },
         // Default comparable (fallback)
         new OperatorGroup() {
             @Override
@@ -159,8 +144,7 @@ public final class FilterOperatorsUtil {
             public boolean isApplicable(final DataType dataType) {
                 return TypeMappingUtils.supportsDataType(dataType) && dataType.isCompatible(BoundedValue.class);
             }
-        },
-        //
+        }, //
         // Pattern matching
         new OperatorGroup() {
             @Override
@@ -268,7 +252,7 @@ public final class FilterOperatorsUtil {
             // Default implementations for non-implementing types
             DEFAULT_COLUMN_OPERATOR_GROUPS.stream().flatMap(group -> group.getOperators(null).stream())
                 .map(op -> op.getNodeParametersClass()),
-            Stream.of(LegacyFilterParameters.class, StringEqualsParameters.class, SingleStringParameters.class) //
+            Stream.of(LegacyFilterParameters.class, StringWithCaseParameters.class, SingleStringParameters.class) //
         ).flatMap(Function.identity());
 
         return Stream.concat(registryClasses.stream(), defaultClasses).distinct().filter(Objects::nonNull).toList();
