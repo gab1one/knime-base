@@ -248,12 +248,11 @@ abstract class AbstractRowFilterNodeSettings implements NodeParameters {
                     return null;
                 }
                 if (context == null) {
-                    throw new StateComputationFailureException("No context available");
+                    throw new StateComputationFailureException();
                 }
                 final var stringChoice = selectedColumn.getStringChoice();
                 return context.getInTableSpec(0).flatMap(s -> Optional.ofNullable(s.getColumnSpec(stringChoice)))
-                    .map(DataColumnSpec::getType).orElseThrow(() -> new StateComputationFailureException(
-                        String.format("Column \"%s\" not found", stringChoice)));
+                    .map(DataColumnSpec::getType).orElseThrow(() -> new StateComputationFailureException());
             }
         }
 
