@@ -105,17 +105,15 @@ public final class IntFilterOperators implements FilterOperators {
             final var isCompLongVal = colType.isCompatible(LongValue.class);
             final var isCompDoubleVal = colType.isCompatible(DoubleValue.class);
             if (!(isCompIntVal || isCompLongVal || isCompDoubleVal)) {
-                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
-                    .withSummary("Operator \"%s\" for column \"%s\" is not supported for type \"%s\"".formatted(
-                        operator.getLabel(), runtimeColumnSpec.getName(), colType.toPrettyString()))
-                    .addResolutions(
-                        // change input
-                        ValueFilterValidationUtil.appendElements(
-                            new StringBuilder("Convert the input column to a compatible type, e.g. "), IntCell.TYPE,
-                            DoubleCell.TYPE, LongCell.TYPE).toString(),
-                        // reconfigure
-                        "Please select a different operator that is compatible with the column's data type \"%s\"." // NOSONAR
-                            .formatted(colType.toPrettyString())));
+                throw ValueFilterValidationUtil
+                    .createInvalidSettingsException(builder -> builder.withSummary(ValueFilterValidationUtil
+                        .getUnsupportedOperatorSummary(super.getDataType(), operator, runtimeColumnSpec))
+                        .addResolutions(
+                            // change input
+                            ValueFilterValidationUtil.resolutionChangeInput(IntCell.TYPE, LongCell.TYPE,
+                                DoubleCell.TYPE),
+                            // reconfigure
+                            ValueFilterValidationUtil.resolutionSelectDifferentOperator(colType)));
             }
             final var intValue = params.createCell().getIntValue();
             if (isCompIntVal) {
@@ -143,17 +141,14 @@ public final class IntFilterOperators implements FilterOperators {
             final var isCompLongVal = colType.isCompatible(LongValue.class);
             final var isCompDoubleVal = colType.isCompatible(DoubleValue.class);
             if (!(isCompIntVal || isCompLongVal || isCompDoubleVal)) {
-                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
-                    .withSummary("Operator \"%s\" for column \"%s\" is not supported for type \"%s\"".formatted(
-                        operator.getLabel(), runtimeColumnSpec.getName(), colType.toPrettyString()))
-                    .addResolutions(
-                        // change input
-                        ValueFilterValidationUtil.appendElements(
-                            new StringBuilder("Convert the input column to a compatible type, e.g. "), IntCell.TYPE,
-                            DoubleCell.TYPE, LongCell.TYPE).toString(),
-                        // reconfigure
-                        "Please select a different operator that is compatible with the column's data type \"%s\"." // NOSONAR
-                            .formatted(colType.toPrettyString())));
+                throw ValueFilterValidationUtil
+                    .createInvalidSettingsException(builder -> builder.withSummary(ValueFilterValidationUtil
+                        .getUnsupportedOperatorSummary(super.getDataType(), operator, runtimeColumnSpec))
+                        .addResolutions(
+                            // change input
+                            ValueFilterValidationUtil.resolutionChangeInput(IntCell.TYPE, LongCell.TYPE,
+                                DoubleCell.TYPE),
+                            ValueFilterValidationUtil.resolutionSelectDifferentOperator(colType)));
             }
             if (isCompIntVal) {
                 return (v, c) -> Integer.compare(((IntValue)v).getIntValue(), c.getIntValue());

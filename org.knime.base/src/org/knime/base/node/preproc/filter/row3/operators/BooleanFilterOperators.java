@@ -120,13 +120,10 @@ public final class BooleanFilterOperators implements FilterOperators {
             throws InvalidSettingsException {
             final var type = runtimeColumnSpec.getType();
             if (!type.isCompatible(BooleanValue.class)) {
-                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder.withSummary(
-                    String.format("Operator \"%s\" for column \"%s\" is not supported for column type \"%s\"",
-                        getLabel(), runtimeColumnSpec.getName(), type.toPrettyString()))
-                    .addResolutions(
-                        // change input
-                        "Convert the input column to \"%s\" type, e.g. with the Table Manipulator node."
-                            .formatted(BooleanCell.TYPE.toPrettyString())));
+                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
+                    .withSummary(ValueFilterValidationUtil.getUnsupportedOperatorSummary(BooleanCell.TYPE, this,
+                        runtimeColumnSpec))
+                    .addResolutions(ValueFilterValidationUtil.resolutionChangeInput(BooleanCell.TYPE)));
             }
             return v -> m_matchTrue == ((BooleanValue)v).getBooleanValue();
         }

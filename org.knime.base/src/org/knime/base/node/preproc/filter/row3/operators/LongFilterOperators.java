@@ -56,7 +56,6 @@ import org.knime.base.node.preproc.filter.row3.operators.defaults.LongParameters
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.data.IntValue;
 import org.knime.core.data.LongValue;
 import org.knime.core.data.def.DoubleCell;
@@ -103,17 +102,14 @@ public final class LongFilterOperators implements FilterOperators {
             final var isCompIntVal = colType.isCompatible(IntValue.class);
             final var isCompLongVal = colType.isCompatible(LongValue.class);
             if (!isCompLongVal && !isCompIntVal) {
-                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
-                    .withSummary("Operator \"%s\" for column \"%s\" is not supported for type \"%s\"".formatted(
-                        operator.getLabel(), runtimeColumnSpec.getName(), colType.toPrettyString()))
-                    .addResolutions(
-                        // change input
-                        ValueFilterValidationUtil.appendElements(
-                            new StringBuilder("Convert the input column to a compatible type, e.g. "),
-                            LongCell.TYPE, IntCell.TYPE).toString(),
-                        // reconfigure
-                        "Please select a different operator that is compatible with the column's data type \"%s\"." // NOSONAR
-                            .formatted(colType.toPrettyString())));
+                throw ValueFilterValidationUtil
+                    .createInvalidSettingsException(builder -> builder.withSummary(ValueFilterValidationUtil
+                        .getUnsupportedOperatorSummary(super.getDataType(), operator, runtimeColumnSpec))
+                        .addResolutions(
+                            // change input
+                            ValueFilterValidationUtil.resolutionChangeInput(LongCell.TYPE, IntCell.TYPE),
+                            // reconfigure
+                            ValueFilterValidationUtil.resolutionChangeInput(colType)));
             }
             final var longValue = params.createCell().getLongValue();
             if (isCompIntVal) {
@@ -136,28 +132,23 @@ public final class LongFilterOperators implements FilterOperators {
             final var colType = runtimeColumnSpec.getType();
             final var isCompIntVal = colType.isCompatible(IntValue.class);
             final var isCompLongVal = colType.isCompatible(LongValue.class);
-            final var isCompDoubleVal = colType.isCompatible(DoubleValue.class);
-            if (!(isCompIntVal || isCompLongVal || isCompDoubleVal)) {
-                throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
-                    .withSummary("Operator \"%s\" for column \"%s\" is not supported for type \"%s\"".formatted(
-                        operator.getLabel(), runtimeColumnSpec.getName(), colType.toPrettyString()))
-                    .addResolutions(
-                        // change input
-                        ValueFilterValidationUtil.appendElements(
-                            new StringBuilder("Convert the input column to a compatible type, e.g. "), IntCell.TYPE,
-                            DoubleCell.TYPE, LongCell.TYPE).toString(),
-                        // reconfigure
-                        "Please select a different operator that is compatible with the column's data type \"%s\"." // NOSONAR
-                            .formatted(colType.toPrettyString())));
+            // for now we don't want to allow Long/Double comparisons, as that would be a lossy conversion
+            if (!(isCompIntVal || isCompLongVal)) {
+                throw ValueFilterValidationUtil
+                    .createInvalidSettingsException(builder -> builder.withSummary(ValueFilterValidationUtil
+                        .getUnsupportedOperatorSummary(super.getDataType(), operator, runtimeColumnSpec))
+                        .addResolutions(
+                            // change input
+                            ValueFilterValidationUtil.resolutionChangeInput(IntCell.TYPE, LongCell.TYPE,
+                                DoubleCell.TYPE),
+                            // reconfigure
+                            ValueFilterValidationUtil.resolutionChangeInput(colType)));
             }
             if (isCompIntVal) {
                 return (v, c) -> Long.compare(((IntValue)v).getIntValue(), c.getLongValue());
             }
-            if (isCompLongVal) {
-                return (v, c) -> Long.compare(((LongValue)v).getLongValue(), c.getLongValue());
-            }
-            // isCompDoubleVal
-            return (v, c) -> Double.compare(((DoubleValue)v).getDoubleValue(), c.getLongValue());
+            // isCompLongVal
+            return (v, c) -> Long.compare(((LongValue)v).getLongValue(), c.getLongValue());
         }
     }
 }

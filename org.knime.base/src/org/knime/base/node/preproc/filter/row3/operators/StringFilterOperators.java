@@ -90,16 +90,16 @@ public final class StringFilterOperators implements FilterOperators {
                     throws InvalidSettingsException {
                     final var runtimeColType = runtimeColumnSpec.getType();
                     if (!runtimeColType.isCompatible(StringValue.class)) {
-                        throw ValueFilterValidationUtil.createInvalidSettingsException(builder -> builder
-                            .withSummary(String.format(
-                                "Operator \"%s\" for column \"%s\" is not supported for column type \"%s\"",
-                                operator.getLabel(), runtimeColumnSpec.getName(), runtimeColType.toPrettyString()))
-                            .addResolutions(
-                                // change input
-                                "Convert the input column to \"%s\" type.".formatted(StringCell.TYPE.toPrettyString()),
-                                // reconfigure
-                                "Select a different operator that is compatible with the column's data type \"%s\""
-                                    .formatted(runtimeColType.toPrettyString())));
+                        throw ValueFilterValidationUtil
+                            .createInvalidSettingsException(builder -> builder
+                                .withSummary(ValueFilterValidationUtil
+                                    .getUnsupportedOperatorSummary(super.getDataType(), operator, runtimeColumnSpec))
+                                .addResolutions(
+                                    // change input
+                                    "Convert the input column to \"%s\" type"
+                                        .formatted(StringCell.TYPE.toPrettyString()),
+                                    // reconfigure
+                                    ValueFilterValidationUtil.resolutionSelectDifferentOperator(runtimeColType)));
                     }
                     final var predicate = params.toStringPredicate();
                     // safe cast due to compatibility check above
